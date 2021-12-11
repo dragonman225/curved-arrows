@@ -25,7 +25,7 @@ export default function getArrow(
   y0: number,
   x1: number,
   y1: number,
-  userOptions: ArrowOptions
+  userOptions?: ArrowOptions
 ): ArrowDescriptor {
   return getBoxToBoxArrow(x0, y0, 0, 0, x1, y1, 0, 0, userOptions)
 }
