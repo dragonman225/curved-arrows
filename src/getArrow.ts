@@ -1,7 +1,7 @@
 import getBoxToBoxArrow, {
   ArrowDescriptor,
   ArrowOptions,
-} from 'getBoxToBoxArrow'
+} from './getBoxToBoxArrow'
 
 /**
  * Get parameters to draw an S-curved line between two points.
