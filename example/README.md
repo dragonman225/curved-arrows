@@ -1,4 +1,4 @@
-A example created with `create-react-app`.
+An example created with `create-react-app`.
 
 ## Available Scripts
 
