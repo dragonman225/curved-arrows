@@ -25,7 +25,7 @@ yarn add curved-arrows
 
 The functions in this library has similar arguments and return values to [steveruizok's perfect-arrows](https://github.com/steveruizok/perfect-arrows). Notable differences are options and the return values containing two control points, one for start point and one end point, instead of one, to represent an S-curve.
 
-The return values provide only the information needed to draw an arrow. You'll need to draw the arrow yourself using your technology of choice. See below for [an example using React and SVG](#example:-a-react-arrow-component).
+The return values provide only the information needed to draw an arrow. You'll need to draw the arrow yourself using your technology of choice. See below for [an example using React and SVG](#example-a-react-arrow-component).
 
 ### `getArrow(x0, y0, x1, y1, options)`
 
