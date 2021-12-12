@@ -124,8 +124,8 @@ See returns in `getArrow` above. (Both functions return the same set of values.)
 ## Example: A React Arrow Component
 
 ```jsx
-import * as React from "react"
-import { getArrow } from "curved-arrows"
+import * as React from 'react'
+import { getArrow } from 'curved-arrows'
 
 export function Arrow() {
   const p1 = { x: 100, y: 100 }
