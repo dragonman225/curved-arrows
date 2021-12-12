@@ -2,32 +2,36 @@
 
 A set of functions for drawing S-curved arrows between points and shapes.
 
-- [`getArrow`](#getarrowx0-y0-x1-y1-options) - For point-to-point arrows.
+- [`getArrow`](#getarrowx0-y0-x1-y1-options) - For point-to-point arrows (**has glitches, not ready yet**).
 - [`getBoxToBoxArrow`](#getboxtoboxarrowx0-y0-w0-h0-x1-y1-w1-h1-options) - For rectangle-to-rectangle arrows.
 
-![demo animation](/demo_animation.gif)
+![demo animation](./demo_animation.gif)
+
+You may also want to see [steveruizok's perfect-arrows](https://github.com/steveruizok/perfect-arrows), it's smarter but the start point and the end point are less predictable.
 
 ## Installation
 
-```
+```bash
 npm i curved-arrows
 ```
 
 _or_
 
-```
+```bash
 yarn add curved-arrows
 ```
 
 ## Usage
 
-The functions in this library provide only the information needed to draw an arrow. You'll need to draw the arrow yourself using your technology of choice. See below for an example React component with SVG.
+The functions in this library has similar arguments and return values to [steveruizok's perfect-arrows](https://github.com/steveruizok/perfect-arrows). Notable differences are options and the return values containing two control points, one for start point and one end point, instead of one, to represent an S-curve.
+
+The return values provide only the information needed to draw an arrow. You'll need to draw the arrow yourself using your technology of choice. See below for [an example using React and SVG](#example:-a-react-arrow-component).
 
 ### `getArrow(x0, y0, x1, y1, options)`
 
-The `getArrow` function accepts the position of two points and returns an array containing information for:
+The `getArrow` function accepts the position of two points and returns an array containing this information:
 
-- four points: a start, end, and two control points
+- four points: start, end, and two control points (one for start, one for end)
 - two angles: end and start
 
 You can use this information to draw an S-curve and arrow heads. You can use the options object to tweak the return values.
@@ -38,7 +42,7 @@ const arrow = getArrow(0, 0, 100, 200, {
   padStart: 0,
   padEnd: arrowHeadSize,
 })
-const [sx, sy, c1x, c1y, c2x, c2y ex, ey, ae, as] = arrow
+const [sx, sy, c1x, c1y, c2x, c2y, ex, ey, ae, as] = arrow
 ```
 
 #### Arguments
@@ -53,10 +57,10 @@ const [sx, sy, c1x, c1y, c2x, c2y ex, ey, ae, as] = arrow
 
 #### Options
 
-| Option       | Type    | Default | Description                                                                                                                                                    |
-| ------------ | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `padStart`   | number  | 0       | How far the arrow's starting point should be from the provided start point.                                                                                    |
-| `padEnd`     | number  | 0       | How far the arrow's ending point should be from the provided end point.                                                                                        |
+| Option     | Type   | Default | Description                                                  |
+| ---------- | ------ | ------- | ------------------------------------------------------------ |
+| `padStart` | number | 0       | How far the arrow's starting point should be from the provided start point. |
+| `padEnd`   | number | 0       | How far the arrow's ending point should be from the provided end point. |
 
 #### Returns
 
@@ -73,19 +77,13 @@ const [sx, sy, c1x, c1y, c2x, c2y ex, ey, ae, as] = arrow
 | `ae`     | number | The angle (in degree) for an ending arrowhead.   |
 | `as`     | number | The angle (in degree) for a starting arrowhead.  |
 
-## Example: A React Arrow Component
-
-```jsx
-// TODO
-```
-
 ---
 
 ### `getBoxToBoxArrow(x0, y0, w0, h0, x1, y1, w1, h1, options)`
 
-The `getBoxToBoxArrow` function accepts the position and dimensions of two boxes (or rectangles) and returns an array containing information for:
+The `getBoxToBoxArrow` function accepts the position and dimensions of two boxes (or rectangles) and returns an array containing this information:
 
-- four points: a start, end, and two control points
+- four points: start, end, and two control points (one for start, one for end)
 - two angles: end and start
 
 You can use this information to draw an S-curve and arrow heads. You can use the options object to tweak the return values.
@@ -93,7 +91,12 @@ You can use this information to draw an S-curve and arrow heads. You can use the
 **Note:** The options and values returned by `getBoxToBoxArrow` are in the same format as the options and values for `getArrow`.
 
 ```js
-// TODO
+const arrowHeadSize = 9
+const arrow = getArrow(0, 0, 200, 100, 300, 50, 200, 100, {
+  padStart: 0,
+  padEnd: arrowHeadSize,
+})
+const [sx, sy, c1x, c1y, c2x, c2y, ex, ey, ae, as] = arrow
 ```
 
 #### Arguments
@@ -118,10 +121,41 @@ See options in `getArrow` above. (Both functions use the same options object.)
 
 See returns in `getArrow` above. (Both functions return the same set of values.)
 
-## Example: A React Box-to-box Arrow Component
+## Example: A React Arrow Component
 
 ```jsx
-// TODO
+import * as React from "react"
+import { getArrow } from "curved-arrows"
+
+export function Arrow() {
+  const p1 = { x: 100, y: 100 }
+  const p2 = { x: 300, y: 200 }
+  const arrowHeadSize = 9
+  const color = 'black'
+  const [sx, sy, c1x, c1y, c2x, c2y, ex, ey, ae] = getArrow(p1.x, p1.y, p2.x, p2.y, {
+    padEnd: arrowHeadSize,
+  })
+
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      xmlns="http://www.w3.org/2000/svg">
+      <path
+        d={`M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`}
+        stroke={color}
+        strokeWidth={arrowHeadSize / 2}
+        fill="none"
+      />
+      <polygon
+        points={`0,${-arrowHeadSize} ${arrowHeadSize *
+          2},0, 0,${arrowHeadSize}`}
+        transform={`translate(${ex}, ${ey}) rotate(${ae})`}
+        fill={color}
+      />
+    </svg>
+  )
+}
 ```
 
 ## Author
