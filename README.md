@@ -1,5 +1,7 @@
 # Curved Arrows
 
+![version](https://img.shields.io/npm/v/curved-arrows.svg?style=flat-square&color=007acc&label=version) ![license](https://img.shields.io/github/license/dragonman225/notablog.svg?style=flat-square&label=license&color=08CE5D)
+
 A set of functions for drawing S-curved arrows between points and shapes.
 
 - [`getArrow`](#getarrowx0-y0-x1-y1-options) - For point-to-point arrows (**has glitches, not ready yet**).
