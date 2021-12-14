@@ -67,7 +67,6 @@ export default function getBoxToBoxArrow(
 
   /** Points of start box. */
   const startBox = { x: x0, y: y0, w: w0, h: h0 }
-  // const centerOfStartBox = centerPointOf(startBox)
   const startAtTop = {
     x: x0 + w0 / 2,
     y: y0 - 2 * options.padStart,
@@ -87,7 +86,6 @@ export default function getBoxToBoxArrow(
 
   /** Points of end box. */
   const endBox = { x: x1, y: y1, w: w1, h: h1 }
-  // const centerOfEndBox = centerPointOf(endBox)
   const endAtTop = { x: x1 + w1 / 2, y: y1 - 2 * options.padEnd }
   const endAtBottom = {
     x: x1 + w1 / 2,
