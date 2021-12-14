@@ -1,34 +1,50 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useControls } from 'leva'
 import { getArrow, getBoxToBoxArrow } from 'curved-arrows'
+import {
+  RectSide,
+  distanceOf,
+  growBox,
+  isPointInBox,
+  Vec2,
+  Box,
+  /** create-react-app is unable to import from 'curved-arrows/src/utils' */
+} from './curved-arrows/utils'
 import { Arrow } from './Arrow'
+import { Line } from './Line'
 
 enum Type {
-  PointToPoint = 'pointToPoint',
-  BoxToBox = 'boxToBox',
+  PointToPoint = 'Point to Point',
+  BoxToBox = 'Box to Box',
 }
 
 function App() {
   /** Leva controls. */
-  const { type, padStart, padEnd } = useControls({
-    type: { value: Type.BoxToBox, options: [Type.BoxToBox, Type.PointToPoint] },
+  const { type, showWhy, showArrow, padStart, padEnd } = useControls({
+    type: {
+      value: Type.BoxToBox,
+      options: [Type.BoxToBox, Type.PointToPoint],
+      label: 'Type',
+    },
+    showWhy: { value: false, label: 'Show Why' },
+    showArrow: { value: true, label: 'Show Arrow' },
     padStart: { value: 0, min: -20, max: 20, step: 1 },
     padEnd: { value: 9, min: -20, max: 20, step: 1 },
   })
 
-  /** Fixed box. */
-  const [box1, setBox1] = useState({
+  /** Fixed start box. */
+  const [startBox, setStartBox] = useState({
     x: window.innerWidth / 2 - 100,
     y: window.innerHeight / 2 - 50,
     w: 200,
     h: 100,
   })
 
-  /** Fix fixed box in the center. */
+  /** Fix start box in the center. */
   useEffect(() => {
     function onResize() {
       console.log('r')
-      setBox1(b => ({
+      setStartBox(b => ({
         ...b,
         x: window.innerWidth / 2 - b.w / 2,
         y: window.innerHeight / 2 - b.h / 2,
@@ -40,10 +56,10 @@ function App() {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  /** Movable box. */
-  const [box2, setBox2] = useState({
-    x: box1.x + 270,
-    y: box1.y + 70,
+  /** Movable end box. */
+  const [endBox, setEndBox] = useState({
+    x: startBox.x + 270,
+    y: startBox.y + 70,
     w: 200,
     h: 100,
   })
@@ -53,7 +69,7 @@ function App() {
     if (e.button !== 0) return
 
     function update(e: React.MouseEvent | MouseEvent) {
-      setBox2(b => ({ ...b, x: e.clientX - b.w / 2, y: e.clientY - b.h / 2 }))
+      setEndBox(b => ({ ...b, x: e.clientX - b.w / 2, y: e.clientY - b.h / 2 }))
     }
 
     function unlisten() {
@@ -72,7 +88,7 @@ function App() {
     if (e.touches.length > 1) return
 
     function update(e: React.TouchEvent | TouchEvent) {
-      setBox2(b => ({
+      setEndBox(b => ({
         ...b,
         x: e.touches[0].clientX - b.w / 2,
         y: e.touches[0].clientY - b.h / 2,
@@ -94,48 +110,167 @@ function App() {
 
   /** Get arrow data. */
   const options = { padStart, padEnd }
-  const pointToPointArrow = getArrow(box1.x, box1.y, box2.x, box2.y, options)
-  const boxToBoxArrow = getBoxToBoxArrow(
-    box1.x,
-    box1.y,
-    box1.w,
-    box1.h,
-    box2.x,
-    box2.y,
-    box2.w,
-    box2.h,
+  const pointToPointArrow = getArrow(
+    startBox.x,
+    startBox.y,
+    endBox.x,
+    endBox.y,
     options
   )
+  const boxToBoxArrow = getBoxToBoxArrow(
+    startBox.x,
+    startBox.y,
+    startBox.w,
+    startBox.h,
+    endBox.x,
+    endBox.y,
+    endBox.w,
+    endBox.h,
+    options
+  )
+
+  /** For explanation part. */
+
+  /** Points of start box. */
+  const startAtTop = {
+    x: startBox.x + startBox.w / 2,
+    y: startBox.y - 2 * options.padStart,
+  }
+  const startAtBottom = {
+    x: startBox.x + startBox.w / 2,
+    y: startBox.y + startBox.h + 2 * options.padStart,
+  }
+  const startAtLeft = {
+    x: startBox.x - 2 * options.padStart,
+    y: startBox.y + startBox.h / 2,
+  }
+  const startAtRight = {
+    x: startBox.x + startBox.w + 2 * options.padStart,
+    y: startBox.y + startBox.h / 2,
+  }
+
+  /** Points of end box. */
+  const endAtTop = {
+    x: endBox.x + endBox.w / 2,
+    y: endBox.y - 2 * options.padEnd,
+  }
+  const endAtBottom = {
+    x: endBox.x + endBox.w / 2,
+    y: endBox.y + endBox.h + 2 * options.padEnd,
+  }
+  const endAtLeft = {
+    x: endBox.x - 2 * options.padEnd,
+    y: endBox.y + endBox.h / 2,
+  }
+  const endAtRight = {
+    x: endBox.x + endBox.w + 2 * options.padEnd,
+    y: endBox.y + endBox.h / 2,
+  }
+
+  const sides: RectSide[] = ['top', 'right', 'bottom', 'left']
+  const startPoints = [startAtTop, startAtRight, startAtBottom, startAtLeft]
+  const endPoints = [endAtTop, endAtRight, endAtBottom, endAtLeft]
+
+  const keepOutZone = 15
+  const lines: {
+    id: string
+    distance: number
+    start: Vec2
+    end: Vec2
+    isUsable: boolean
+  }[] = []
+  let bestLine = '0-0'
+  let shortestDistance = 1 / 0
+
+  function isStartEndUsable(
+    start: Vec2,
+    end: Vec2,
+    startBox: Box,
+    endBox: Box
+  ) {
+    return !(
+      isPointInBox(start, growBox(endBox, keepOutZone)) ||
+      isPointInBox(end, growBox(startBox, keepOutZone))
+    )
+  }
+
+  for (let startSideId = 0; startSideId < sides.length; startSideId++) {
+    const startPoint = startPoints[startSideId]
+
+    for (let endSideId = 0; endSideId < sides.length; endSideId++) {
+      const endPoint = endPoints[endSideId]
+
+      const distance = distanceOf(startPoint, endPoint)
+      const isUsable = isStartEndUsable(startPoint, endPoint, startBox, endBox)
+      const line = {
+        id: `${startSideId}-${endSideId}`,
+        distance,
+        start: startPoint,
+        end: endPoint,
+        isUsable,
+      }
+      lines.push(line)
+      if (isUsable && distance < shortestDistance) {
+        shortestDistance = distance
+        bestLine = line.id
+      }
+    }
+  }
 
   return (
     <div className="app" onMouseDown={onMouseDown} onTouchStart={onTouchStart}>
       {type === Type.BoxToBox && (
         <>
           <div
-            key="box1"
+            key="startBox"
             className="box"
             style={{
-              transform: `translate(${box1.x}px, ${box1.y}px)`,
-              width: box1.w,
-              height: box1.h,
+              transform: `translate(${startBox.x}px, ${startBox.y}px)`,
+              width: startBox.w,
+              height: startBox.h,
             }}
           />
           <div
-            key="box2"
+            key="endBox"
             className="box"
             style={{
-              transform: `translate(${box2.x}px, ${box2.y}px)`,
-              width: box2.w,
-              height: box2.h,
+              transform: `translate(${endBox.x}px, ${endBox.y}px)`,
+              width: endBox.w,
+              height: endBox.h,
             }}
           />
         </>
       )}
-      <Arrow
-        arrowDescriptor={
-          type === Type.BoxToBox ? boxToBoxArrow : pointToPointArrow
-        }
-      />
+      <div>
+        {showWhy &&
+          lines.map(line => (
+            <Line
+              key={line.id}
+              x1={line.start.x}
+              y1={line.start.y}
+              x2={line.end.x}
+              y2={line.end.y}
+              color={
+                line.isUsable
+                  ? bestLine === line.id
+                    ? 'hsl(37deg, 87%, 68%)' // yellow
+                    : 'hsl(138deg, 83%, 79%)' // green
+                  : 'hsl(350deg, 100%, 77%)' // red
+              }
+              strokeWidth={bestLine === line.id ? 6 : 3}
+              zIndex={bestLine === line.id ? 1 : 0}
+            />
+          ))}
+      </div>
+      {showArrow && (
+        <Arrow
+          arrowDescriptor={
+            type === Type.BoxToBox ? boxToBoxArrow : pointToPointArrow
+          }
+          color="rgb(53, 47, 43)"
+          zIndex={1}
+        />
+      )}
     </div>
   )
 }

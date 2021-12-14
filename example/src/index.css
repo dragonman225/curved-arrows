@@ -12,5 +12,6 @@ html, body, #root, .app {
   position: absolute;
   top: 0;
   left: 0;
-  border: 5px solid black;
+  border: 4.5px solid #B9B7BD;
+  background: #EEEDE7;
 }
