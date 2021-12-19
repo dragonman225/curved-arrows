@@ -30,11 +30,12 @@ export type ArrowDescriptor = [
 export type ArrowOptions = Partial<{
   padStart: number
   padEnd: number
+  controlPointStretch: number
 }>
 
 /**
  * Get parameters to draw an S-curved line between two boxes.
- * 
+ *
  * @returns [sx, sy, c1x, c1y, c2x, c2y, ex, ey, ae, as]
  * @example
  * const arrowHeadSize = 9
@@ -42,7 +43,7 @@ export type ArrowOptions = Partial<{
  *  startX, startY,
  *  controlStartX, controlStartY,
  *  controlEndX, controlEndY,
- *  endX, endY, 
+ *  endX, endY,
  *  endAngle,
  *  startAngle
  * ] = getBoxToBoxArrow(0, 0, 100, 100, 200, 200, 200, 100, {
@@ -63,7 +64,12 @@ export default function getBoxToBoxArrow(
   h1: number,
   userOptions?: ArrowOptions
 ): ArrowDescriptor {
-  const options = { padStart: 0, padEnd: 0, ...userOptions }
+  const options = {
+    padStart: 0,
+    padEnd: 0,
+    controlPointStretch: 50,
+    ...userOptions,
+  }
 
   /** Points of start box. */
   const startBox = { x: x0, y: y0, w: w0, h: h0 }
@@ -135,12 +141,14 @@ export default function getBoxToBoxArrow(
   const controlPointForStartPoint = controlPointOf(
     bestStartPoint,
     bestEndPoint,
-    bestStartSide
+    bestStartSide,
+    options.controlPointStretch
   )
   const controlPointForEndPoint = controlPointOf(
     bestEndPoint,
     bestStartPoint,
-    bestEndSide
+    bestEndSide,
+    options.controlPointStretch
   )
 
   return [
