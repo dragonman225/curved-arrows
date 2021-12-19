@@ -9,7 +9,7 @@ A set of functions for drawing S-curved arrows between points and shapes.
 
 ![demo animation](./demo_animation.gif)
 
-[👉 Demo](https://dragonman225.js.org/p/curved-arrows/)
+[👉 Demo](https://dragonman225.js.org/p/curved-arrows/) | [How it works](https://dragonman225.js.org/curved-arrows.html)
 
 You may also want to see [steveruizok's perfect-arrows](https://github.com/steveruizok/perfect-arrows), it's smarter but the start point and the end point are less predictable.
 
