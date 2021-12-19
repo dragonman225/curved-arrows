@@ -38,31 +38,35 @@ export function isPointInBox(point: Vec2, box: Box): boolean {
 export function controlPointOf(
   target: Vec2,
   another: Vec2,
-  sideOfTarget: RectSide
+  sideOfTarget: RectSide,
+  /**
+   * The distance a control point must be far away from the target in the
+   * direction of leaving the target.
+   */
+  minDistanceToTarget: number = 50
 ) {
-  const margin = 30
   switch (sideOfTarget) {
     case 'top': {
       return {
         x: target.x,
-        y: Math.min(target.y - (target.y - another.y) / 2, target.y - margin),
+        y: Math.min((target.y + another.y) / 2, target.y - minDistanceToTarget),
       }
     }
     case 'bottom': {
       return {
         x: target.x,
-        y: Math.max(target.y - (target.y - another.y) / 2, target.y + margin),
+        y: Math.max((target.y + another.y) / 2, target.y + minDistanceToTarget),
       }
     }
     case 'left': {
       return {
-        x: Math.min(target.x - (target.x - another.x) / 2, target.x - margin),
+        x: Math.min((target.x + another.x) / 2, target.x - minDistanceToTarget),
         y: target.y,
       }
     }
     case 'right': {
       return {
-        x: Math.max(target.x - (target.x - another.x) / 2, target.x + margin),
+        x: Math.max((target.x + another.x) / 2, target.x + minDistanceToTarget),
         y: target.y,
       }
     }

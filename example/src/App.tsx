@@ -20,7 +20,14 @@ enum Type {
 
 function App() {
   /** Leva controls. */
-  const { type, showWhy, showArrow, padStart, padEnd } = useControls({
+  const {
+    type,
+    showWhy,
+    showArrow,
+    padStart,
+    padEnd,
+    controlPointStretch,
+  } = useControls({
     type: {
       value: Type.BoxToBox,
       options: [Type.BoxToBox, Type.PointToPoint],
@@ -30,6 +37,7 @@ function App() {
     showArrow: { value: true, label: 'Show Arrow' },
     padStart: { value: 0, min: -20, max: 20, step: 1 },
     padEnd: { value: 9, min: -20, max: 20, step: 1 },
+    controlPointStretch: { value: 50, min: 0, max: 300 },
   })
 
   /** Fixed start box. */
@@ -37,7 +45,7 @@ function App() {
     x: window.innerWidth / 2 - 100,
     y: window.innerHeight / 2 - 50,
     w: 200,
-    h: 100,
+    h: 80,
   })
 
   /** Fix start box in the center. */
@@ -60,8 +68,8 @@ function App() {
   const [endBox, setEndBox] = useState({
     x: startBox.x + 270,
     y: startBox.y + 70,
-    w: 200,
-    h: 100,
+    w: 180,
+    h: 80,
   })
 
   /** Handle mouse. */
@@ -109,7 +117,7 @@ function App() {
   }, [])
 
   /** Get arrow data. */
-  const options = { padStart, padEnd }
+  const options = { padStart, padEnd, controlPointStretch }
   const pointToPointArrow = getArrow(
     startBox.x,
     startBox.y,
