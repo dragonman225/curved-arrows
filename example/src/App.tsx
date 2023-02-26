@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useControls } from 'leva'
-import { getArrow, getBoxToBoxArrow } from 'curved-arrows'
+import { folder, useControls } from 'leva'
+import { ArrowOptions, getArrow, getBoxToBoxArrow } from 'curved-arrows'
 import {
   RectSide,
   distanceOf,
@@ -27,6 +27,15 @@ function App() {
     padStart,
     padEnd,
     controlPointStretch,
+    canStartAtTop,
+    canStartAtLeft,
+    canStartAtBottom,
+    canStartAtRight,
+    canEndAtTop,
+    canEndAtLeft,
+    canEndAtBottom,
+    canEndAtRight,
+    
   } = useControls({
     type: {
       value: Type.BoxToBox,
@@ -38,6 +47,19 @@ function App() {
     padStart: { value: 0, min: -20, max: 20, step: 1 },
     padEnd: { value: 9, min: -20, max: 20, step: 1 },
     controlPointStretch: { value: 50, min: 0, max: 300 },
+    
+    start: folder({
+      canStartAtTop: { value: true, label: 'Top'},
+      canStartAtLeft: { value: true, label: 'Left'},
+      canStartAtBottom: { value: true, label: 'Bottom'},
+      canStartAtRight: { value: true, label: 'Right'},
+    }),
+    end: folder({
+      canEndAtTop: { value: true, label: 'Top'},
+      canEndAtLeft: { value: true, label: 'Left'},
+      canEndAtBottom: { value: true, label: 'Bottom'},
+      canEndAtRight: { value: true, label: 'Right'},
+    })
   })
 
   /** Fixed start box. */
@@ -116,8 +138,26 @@ function App() {
     window.addEventListener('touchcancel', unlisten)
   }, [])
 
+  var sidePermissions = {
+    'top': [canStartAtTop, canEndAtTop],
+    'left': [canStartAtLeft, canEndAtLeft],
+    'bottom': [canStartAtBottom, canEndAtBottom],
+    'right': [canStartAtRight, canEndAtRight],
+  }
+  var allowedStartSides: RectSide[] = [];
+  var allowedEndSides: RectSide[] = [];
+
+  if (canStartAtTop) { allowedStartSides.push('top') }
+  if (canStartAtLeft) { allowedStartSides.push('left') }
+  if (canStartAtBottom) { allowedStartSides.push('bottom') }
+  if (canStartAtRight) { allowedStartSides.push('right') }
+  if (canEndAtTop) { allowedEndSides.push('top') }
+  if (canEndAtLeft) { allowedEndSides.push('left') }
+  if (canEndAtBottom) { allowedEndSides.push('bottom') }
+  if (canEndAtRight) { allowedEndSides.push('right') }
+  
   /** Get arrow data. */
-  const options = { padStart, padEnd, controlPointStretch }
+  const options : ArrowOptions = { padStart, padEnd, controlPointStretch, allowedStartSides, allowedEndSides }
   const pointToPointArrow = getArrow(
     startBox.x,
     startBox.y,
@@ -142,42 +182,60 @@ function App() {
   /** Points of start box. */
   const startAtTop = {
     x: startBox.x + startBox.w / 2,
-    y: startBox.y - 2 * options.padStart,
+    y: startBox.y - 2 * (options.padStart ?? 0),
   }
   const startAtBottom = {
     x: startBox.x + startBox.w / 2,
-    y: startBox.y + startBox.h + 2 * options.padStart,
+    y: startBox.y + startBox.h + 2 * (options.padStart ?? 0),
   }
   const startAtLeft = {
-    x: startBox.x - 2 * options.padStart,
+    x: startBox.x - 2 * (options.padStart ?? 0),
     y: startBox.y + startBox.h / 2,
   }
   const startAtRight = {
-    x: startBox.x + startBox.w + 2 * options.padStart,
+    x: startBox.x + startBox.w + 2 * (options.padStart ?? 0),
     y: startBox.y + startBox.h / 2,
   }
 
   /** Points of end box. */
   const endAtTop = {
     x: endBox.x + endBox.w / 2,
-    y: endBox.y - 2 * options.padEnd,
+    y: endBox.y - 2 * (options.padEnd ?? 0),
   }
   const endAtBottom = {
     x: endBox.x + endBox.w / 2,
-    y: endBox.y + endBox.h + 2 * options.padEnd,
+    y: endBox.y + endBox.h + 2 * (options.padEnd ?? 0),
   }
   const endAtLeft = {
-    x: endBox.x - 2 * options.padEnd,
+    x: endBox.x - 2 * (options.padEnd ?? 0),
     y: endBox.y + endBox.h / 2,
   }
   const endAtRight = {
-    x: endBox.x + endBox.w + 2 * options.padEnd,
+    x: endBox.x + endBox.w + 2 * (options.padEnd ?? 0),
     y: endBox.y + endBox.h / 2,
   }
 
-  const sides: RectSide[] = ['top', 'right', 'bottom', 'left']
-  const startPoints = [startAtTop, startAtRight, startAtBottom, startAtLeft]
-  const endPoints = [endAtTop, endAtRight, endAtBottom, endAtLeft]
+  type Coordinate = { x: number, y: number };
+
+  const startPoints: Coordinate[] = [];
+  const endPoints: Coordinate[] = []
+
+  if (canStartAtTop) { startPoints.push(startAtTop) };
+  if (canStartAtRight) { startPoints.push(startAtRight) };
+  if (canStartAtBottom) { startPoints.push(startAtBottom) };
+  if (canStartAtLeft) { startPoints.push(startAtLeft) };
+  if (canEndAtTop) { endPoints.push(endAtTop) };
+  if (canEndAtRight) { endPoints.push(endAtRight) };
+  if (canEndAtBottom) { endPoints.push(endAtBottom) };
+  if (canEndAtLeft) { endPoints.push(endAtLeft) };
+
+  if (startPoints.length === 0) {
+    startPoints.push(...[startAtTop, startAtRight, startAtBottom, startAtLeft,])
+  }
+
+  if (endPoints.length === 0) {
+    endPoints.push(...[endAtTop, endAtRight, endAtBottom, endAtLeft,])
+  }
 
   const keepOutZone = 15
   const lines: {
@@ -202,10 +260,10 @@ function App() {
     )
   }
 
-  for (let startSideId = 0; startSideId < sides.length; startSideId++) {
+  for (let startSideId = 0; startSideId < startPoints.length; startSideId++) {
     const startPoint = startPoints[startSideId]
 
-    for (let endSideId = 0; endSideId < sides.length; endSideId++) {
+    for (let endSideId = 0; endSideId < endPoints.length; endSideId++) {
       const endPoint = endPoints[endSideId]
 
       const distance = distanceOf(startPoint, endPoint)
