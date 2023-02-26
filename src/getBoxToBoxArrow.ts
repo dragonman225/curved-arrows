@@ -31,6 +31,8 @@ export type ArrowOptions = Partial<{
   padStart: number
   padEnd: number
   controlPointStretch: number
+  allowedStartSides: RectSide[]
+  allowedEndSides: RectSide[]
 }>
 
 /**
@@ -68,6 +70,8 @@ export default function getBoxToBoxArrow(
     padStart: 0,
     padEnd: 0,
     controlPointStretch: 50,
+    allowedStartSides: ['top','right','bottom','left'] as RectSide[],
+    allowedEndSides: ['top','right','bottom','left'] as RectSide[],
     ...userOptions,
   }
 
@@ -103,10 +107,26 @@ export default function getBoxToBoxArrow(
     y: y1 + h1 / 2,
   }
 
-  const sides: RectSide[] = ['top', 'right', 'bottom', 'left']
-  const startPoints = [startAtTop, startAtRight, startAtBottom, startAtLeft]
-  const endPoints = [endAtTop, endAtRight, endAtBottom, endAtLeft]
+  /** Build the list of allowed starting and ending points for this arrow, based
+   * on the specified sides that were allowed. If no sides were specified, allow
+   * all sides. */
+  const allSides: RectSide[] = ['top', 'right', 'bottom', 'left'];
+  const startSides: RectSide[] = (options.allowedStartSides.length > 0) ? options.allowedStartSides : allSides;
+  const endSides: RectSide[] = (options.allowedEndSides.length > 0) ? options.allowedEndSides : allSides;
 
+  var startPoints: Record<RectSide, { x: number, y: number }> = {
+    'top': startAtTop,
+    'right': startAtRight,
+    'bottom': startAtBottom,
+    'left': startAtLeft,
+  }
+  var endPoints: Record<RectSide, { x: number, y: number }> = {
+    'top': endAtTop,
+    'right': endAtRight,
+    'bottom': endAtBottom,
+    'left': endAtLeft,
+  }
+  
   let shortestDistance = 1 / 0
   let bestStartPoint = startAtTop
   let bestEndPoint = endAtTop
@@ -114,12 +134,14 @@ export default function getBoxToBoxArrow(
   let bestEndSide: RectSide = 'top'
 
   const keepOutZone = 15
-  for (let startSideId = 0; startSideId < sides.length; startSideId++) {
-    const startPoint = startPoints[startSideId]
+  for (let startSideId = 0; startSideId < startSides.length; startSideId++) {
+    const startSide = startSides[startSideId];
+    const startPoint = startPoints[startSide]
     if (isPointInBox(startPoint, growBox(endBox, keepOutZone))) continue
-
-    for (let endSideId = 0; endSideId < sides.length; endSideId++) {
-      const endPoint = endPoints[endSideId]
+    
+    for (let endSideId = 0; endSideId < endSides.length; endSideId++) {
+      const endSide = endSides[endSideId];
+      const endPoint = endPoints[endSide]
 
       /**
        * If the start point is in the rectangle of end, or the end point
@@ -132,8 +154,8 @@ export default function getBoxToBoxArrow(
         shortestDistance = d
         bestStartPoint = startPoint
         bestEndPoint = endPoint
-        bestStartSide = sides[startSideId]
-        bestEndSide = sides[endSideId]
+        bestStartSide = startSide
+        bestEndSide = endSide
       }
     }
   }
