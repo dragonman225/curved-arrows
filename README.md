@@ -61,10 +61,11 @@ const [sx, sy, c1x, c1y, c2x, c2y, ex, ey, ae, as] = arrow
 
 #### Options
 
-| Option     | Type   | Default | Description                                                  |
-| ---------- | ------ | ------- | ------------------------------------------------------------ |
-| `padStart` | number | 0       | How far the arrow's starting point should be from the provided start point. |
-| `padEnd`   | number | 0       | How far the arrow's ending point should be from the provided end point. |
+| Option                | Type   | Default | Description                                                  |
+| --------------------- | ------ | :-----: | ------------------------------------------------------------ |
+| `padStart`            | number | 0       | How far the arrow's starting point should be from the provided starting point. |
+| `padEnd`              | number | 0       | How far the arrow's ending point should be from the provided ending point. |
+| `controlPointStretch` | number | 50      | Enforce a minimal distance from the arrow's starting/ending point to the control points making the curve. ([demo](https://dragonman225.js.org/p/curved-arrows/), [more explanation](https://dragonman225.js.org/curved-arrows.html#https://www.notion.so/f6f375cfe7eb48f48d4e624e577c9f0f), [code](https://github.com/dragonman225/curved-arrows/blob/8e8fd1369a3d418efef6f334bf8865d55f0d7982/src/getBoxToBoxArrow.ts#L33)) |
 
 #### Returns
 
