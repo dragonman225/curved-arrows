@@ -47,7 +47,6 @@ function App() {
     padStart: { value: 0, min: -20, max: 20, step: 1 },
     padEnd: { value: 9, min: -20, max: 20, step: 1 },
     controlPointStretch: { value: 50, min: 0, max: 300 },
-    
     start: folder({
       canStartAtTop: { value: true, label: 'Top'},
       canStartAtLeft: { value: true, label: 'Left'},
@@ -138,14 +137,14 @@ function App() {
     window.addEventListener('touchcancel', unlisten)
   }, [])
 
-  var sidePermissions = {
+  const sidePermissions = {
     'top': [canStartAtTop, canEndAtTop],
     'left': [canStartAtLeft, canEndAtLeft],
     'bottom': [canStartAtBottom, canEndAtBottom],
     'right': [canStartAtRight, canEndAtRight],
   }
-  var allowedStartSides: RectSide[] = [];
-  var allowedEndSides: RectSide[] = [];
+  const allowedStartSides: RectSide[] = [];
+  const allowedEndSides: RectSide[] = [];
 
   if (canStartAtTop) { allowedStartSides.push('top') }
   if (canStartAtLeft) { allowedStartSides.push('left') }

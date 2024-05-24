@@ -114,13 +114,13 @@ export default function getBoxToBoxArrow(
   const startSides: RectSide[] = (options.allowedStartSides.length > 0) ? options.allowedStartSides : allSides;
   const endSides: RectSide[] = (options.allowedEndSides.length > 0) ? options.allowedEndSides : allSides;
 
-  var startPoints: Record<RectSide, { x: number, y: number }> = {
+  const startPoints: Record<RectSide, { x: number, y: number }> = {
     'top': startAtTop,
     'right': startAtRight,
     'bottom': startAtBottom,
     'left': startAtLeft,
   }
-  var endPoints: Record<RectSide, { x: number, y: number }> = {
+  const endPoints: Record<RectSide, { x: number, y: number }> = {
     'top': endAtTop,
     'right': endAtRight,
     'bottom': endAtBottom,
@@ -135,12 +135,12 @@ export default function getBoxToBoxArrow(
 
   const keepOutZone = 15
   for (let startSideId = 0; startSideId < startSides.length; startSideId++) {
-    const startSide = startSides[startSideId];
+    const startSide = startSides[startSideId]
     const startPoint = startPoints[startSide]
     if (isPointInBox(startPoint, growBox(endBox, keepOutZone))) continue
     
     for (let endSideId = 0; endSideId < endSides.length; endSideId++) {
-      const endSide = endSides[endSideId];
+      const endSide = endSides[endSideId]
       const endPoint = endPoints[endSide]
 
       /**
