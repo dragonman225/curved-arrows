@@ -35,7 +35,6 @@ function App() {
     canEndAtLeft,
     canEndAtBottom,
     canEndAtRight,
-    
   } = useControls({
     type: {
       value: Type.BoxToBox,
@@ -47,17 +46,17 @@ function App() {
     padStart: { value: 0, min: -20, max: 20, step: 1 },
     padEnd: { value: 9, min: -20, max: 20, step: 1 },
     controlPointStretch: { value: 50, min: 0, max: 300 },
-    start: folder({
-      canStartAtTop: { value: true, label: 'Top'},
-      canStartAtLeft: { value: true, label: 'Left'},
-      canStartAtBottom: { value: true, label: 'Bottom'},
-      canStartAtRight: { value: true, label: 'Right'},
+    allowedStartSides: folder({
+      canStartAtTop: { value: true, label: 'top'},
+      canStartAtLeft: { value: true, label: 'left'},
+      canStartAtBottom: { value: true, label: 'bottom'},
+      canStartAtRight: { value: true, label: 'right'},
     }),
-    end: folder({
-      canEndAtTop: { value: true, label: 'Top'},
-      canEndAtLeft: { value: true, label: 'Left'},
-      canEndAtBottom: { value: true, label: 'Bottom'},
-      canEndAtRight: { value: true, label: 'Right'},
+    allowedEndSides: folder({
+      canEndAtTop: { value: true, label: 'top'},
+      canEndAtLeft: { value: true, label: 'left'},
+      canEndAtBottom: { value: true, label: 'bottom'},
+      canEndAtRight: { value: true, label: 'right'},
     })
   })
 
@@ -137,12 +136,6 @@ function App() {
     window.addEventListener('touchcancel', unlisten)
   }, [])
 
-  const sidePermissions = {
-    'top': [canStartAtTop, canEndAtTop],
-    'left': [canStartAtLeft, canEndAtLeft],
-    'bottom': [canStartAtBottom, canEndAtBottom],
-    'right': [canStartAtRight, canEndAtRight],
-  }
   const allowedStartSides: RectSide[] = [];
   const allowedEndSides: RectSide[] = [];
 
@@ -156,7 +149,7 @@ function App() {
   if (canEndAtRight) { allowedEndSides.push('right') }
   
   /** Get arrow data. */
-  const options : ArrowOptions = { padStart, padEnd, controlPointStretch, allowedStartSides, allowedEndSides }
+  const options: ArrowOptions = { padStart, padEnd, controlPointStretch, allowedStartSides, allowedEndSides }
   const pointToPointArrow = getArrow(
     startBox.x,
     startBox.y,
