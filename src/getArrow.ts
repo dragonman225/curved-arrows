@@ -5,12 +5,12 @@ import getBoxToBoxArrow, {
 
 /**
  * Get parameters to draw an S-curved line between two points.
- * 
- * @param x0 
- * @param y0 
- * @param x1 
- * @param y1 
- * @param userOptions 
+ *
+ * @param x0
+ * @param y0
+ * @param x1
+ * @param y1
+ * @param userOptions
  * @returns [sx, sy, c1x, c1y, c2x, c2y, ex, ey, ae, as]
  * @example
  * const arrowHeadSize = 9
